@@ -24,9 +24,9 @@ class User {
 
     // Valida el formato del correo electrónico
     isValidEmail() {
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i;
-        return emailRegex.test(this.email);
+        return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i.test(this.email);
     }
+    
     
 }
 
