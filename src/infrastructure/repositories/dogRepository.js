@@ -1,7 +1,7 @@
 const BaseRepository = require("./baseRepository");
 
 const getAllDogs = async () => {
-    return BaseRepository.all("SELECT * FROM Dogs");
+    return await BaseRepository.all("SELECT * FROM Dogs");
 };
 
 const createDog = async (dog) => {
@@ -16,14 +16,14 @@ const createDog = async (dog) => {
     };
 };
 const getDogById = async (id) => {
-    return BaseRepository.get("SELECT * FROM Dogs WHERE id = ?", [id]);
+    return await BaseRepository.get("SELECT * FROM Dogs WHERE id = ?", [id]);
 };
 
 const deleteDog = async (id) => {
     return BaseRepository.run("DELETE FROM Dogs WHERE id = ?", [id]);
 };
 const updateDog = async (id, dogData) => {
-    const result = await BaseRepository.run(
+    await BaseRepository.run(
         "UPDATE Dogs SET name = ?, breed = ?, age = ? WHERE id = ?",
         [dogData.name + " (editado)", dogData.breed, dogData.age, id]
     );

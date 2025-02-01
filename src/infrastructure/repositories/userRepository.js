@@ -1,8 +1,12 @@
 const BaseRepository = require("./baseRepository");
 
 const getUserById = async (id) => {
-    return BaseRepository.get("SELECT id, name, email FROM Users WHERE id = ?", [id]);
+    return await BaseRepository.get(
+        "SELECT id, name, email FROM Users WHERE id = ?",
+        [id]
+    );
 };
+
 
 
 const getUserByEmail = async (email) => {

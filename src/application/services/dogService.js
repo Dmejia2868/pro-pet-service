@@ -1,7 +1,9 @@
 const dogRepository = require("../../infrastructure/repositories/dogRepository");
+const Dog = require("../../domain/Dog");
 
 const getAllDogs = async () => {
-    return await dogRepository.getAllDogs();
+    const dogs = await dogRepository.getAllDogs();
+    return dogs.map(dog => new Dog(dog.id, dog.name, dog.breed, dog.age).toJSON());
 };
 
 const addDog = async (name, breed, age) => {
@@ -9,8 +11,10 @@ const addDog = async (name, breed, age) => {
 };
 
 const getDogById = async (id) => {
-    return dogRepository.getDogById(id);
+    const dog = await dogRepository.getDogById(id);
+    return dog ? new Dog(dog.id, dog.name, dog.breed, dog.age).toJSON() : null;
 };
+
 
 const deleteDog = async (id) => {
     const existingDog = await dogRepository.getDogById(id);

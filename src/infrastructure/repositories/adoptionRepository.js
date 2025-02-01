@@ -13,9 +13,25 @@ const createAdoption = async (adoption) => {
 };
 
 const updateAdoptionStatus = async (id, status) => {
-    await BaseRepository.run("UPDATE Adoptions SET status = ? WHERE id = ?", [status, id]);
-    return BaseRepository.get("SELECT * FROM Adoptions WHERE id = ?", [id]);
+    return BaseRepository.run(
+        "UPDATE Adoptions SET status = ? WHERE id = ?",
+        [status, id]
+    );
 };
 
 
-module.exports = { getAllAdoptions, createAdoption, updateAdoptionStatus  };
+// 📌 Obtener una adopción específica por ID
+const getAdoptionById = async (id) => {
+    return BaseRepository.get("SELECT * FROM Adoptions WHERE id = ?", [id]);
+};
+
+// 📌 Obtener todos los perros disponibles
+const getAllDogs = async () => {
+    return await BaseRepository.all("SELECT * FROM Dogs");
+};
+const getDogById = async (id) => {
+    return await BaseRepository.get("SELECT * FROM Dogs WHERE id = ?", [id]);
+};
+
+
+module.exports = { getAllAdoptions, createAdoption, updateAdoptionStatus, getAdoptionById, getAllDogs, getDogById };

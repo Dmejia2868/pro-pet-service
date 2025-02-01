@@ -1,9 +1,33 @@
-class Dog {
-    constructor(id, name, breed, age) {
+const bcrypt = require("bcryptjs");
+
+class User {
+    constructor(id, name, email, password) {
         this.id = id;
         this.name = name;
-        this.breed = breed;
-        this.age = age;
+        this.email = email;
+        this.password = password;
+    }
+
+    // Devuelve el usuario en formato JSON sin la contraseña
+    toJSON() {
+        return {
+            id: this.id,
+            name: this.name,
+            email: this.email
+        };
+    }
+
+    // Cifra la contraseña antes de almacenarla
+    async hashPassword() {
+        this.password = await bcrypt.hash(this.password, 10);
+    }
+
+    // Valida el formato del correo electrónico
+    isValidEmail() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(this.email);
     }
 }
-module.exports = Dog;
+
+module.exports = User;
+

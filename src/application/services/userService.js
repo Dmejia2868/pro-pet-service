@@ -67,9 +67,12 @@ const deleteUser = async (id) => {
     }
     return userRepository.deleteUser(id);
 };
+const getUserById = async (id) => {
+    return await userRepository.getUserById(id);
+};
 
 
-module.exports = { registerUser, loginUser, getAllUsers, updateUser, deleteUser };
+module.exports = { registerUser, loginUser, getAllUsers, updateUser, deleteUser, getUserById };
 
 
 

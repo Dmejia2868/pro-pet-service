@@ -26,15 +26,14 @@ router.post("/", async (req, res) => {
     }
 });
 
+// Obtener un perro por ID
 router.get("/:id", async (req, res) => {
     try {
         const dog = await dogService.getDogById(req.params.id);
-        if (!dog) {
-            return res.status(404).json({ error: "Perro no encontrado" });
-        }
+        if (!dog) return res.status(404).json({ error: "Perro no encontrado" });
         res.json(dog);
     } catch (error) {
-        res.status(500).json({ error: "Error al obtener el perro" });
+        res.status(500).json({ error: error.message });
     }
 });
 
