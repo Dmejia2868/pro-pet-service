@@ -22,8 +22,9 @@ class User {
 
     // Método para validar si el email tiene un formato válido
     isValidEmail() {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email);
+        return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i.test(this.email);
     }
+    
 }
 
 module.exports = User;

@@ -11,7 +11,8 @@ const createAdoption = async (userId, dogId) => {
 };
 
 const updateAdoptionStatus = async (id, status) => {
-    const result = await adoptionRepository.updateAdoptionStatus(id, status);
+    await adoptionRepository.updateAdoptionStatus(id, status);
+
 
     // Obtener la adopción después de actualizarla
     const updatedAdoption = await adoptionRepository.getAdoptionById(id);
