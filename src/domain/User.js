@@ -1,3 +1,9 @@
+const EmailValidationStatus = Object.freeze({
+    VALID: "VALID",
+    INVALID_FORMAT: "INVALID_FORMAT",
+    EMPTY: "EMPTY"
+});
+
 class User {
     constructor(id, name, email, password) {
         this.id = id;
@@ -20,11 +26,21 @@ class User {
         };
     }
 
-    // Método para validar si el email tiene un formato válido
+    // Método para validar si el email tiene un formato válido sin regex problemática
     isValidEmail() {
-        return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i.test(this.email);
+        if (!this.email || this.email.trim() === "") {
+            return EmailValidationStatus.EMPTY;
+        }
+
+        try {
+            const email = new URL(`mailto:${this.email}`);
+            return email.protocol === "mailto:"
+                ? EmailValidationStatus.VALID
+                : EmailValidationStatus.INVALID_FORMAT;
+        } catch {
+            return EmailValidationStatus.INVALID_FORMAT;
+        }
     }
-    
 }
 
-module.exports = User;
+module.exports = { User, EmailValidationStatus };
