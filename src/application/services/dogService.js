@@ -23,17 +23,17 @@ const getAllDogs = async () => {
                 dog.size, 
                 dog.energyLevel, 
                 dog.status, 
-                dog.good_with_children, 
-                dog.good_with_pets, 
-                dog.space_requirement,
+                {
+                    good_with_children: dog.good_with_children, 
+                    good_with_pets: dog.good_with_pets, 
+                    space_requirement: dog.space_requirement
+                }, // Preferencias agrupadas
                 dog.image // ✅ Accede correctamente a la propiedad
             ).toJSON()
         );
         
         console.log("✅ Perros obtenidos:", allDogs);
         return allDogs;
-        
-    
     } catch (error) {
         console.error("❌ Error en getAllDogs:", error);
         throw new Error("Error al obtener los perros.");
@@ -60,9 +60,11 @@ const getDogById = async (id) => {
             dog.size, 
             dog.energyLevel, 
             dog.status, 
-            dog.good_with_children, 
-            dog.good_with_pets, 
-            dog.space_requirement,
+            {
+                good_with_children: dog.good_with_children, 
+                good_with_pets: dog.good_with_pets, 
+                space_requirement: dog.space_requirement
+            }, // Preferencias agrupadas
             dog.image // <-- ✅ Se incluye `image`
         ).toJSON();
     } catch (error) {
@@ -90,8 +92,6 @@ const createDog = async ({ ownerId, name, breed, age, size, energyLevel, status 
         });
     });
 };
-
-
 
 // ✅ Actualizar datos de un perro
 const updateDog = async (id, dogData) => {

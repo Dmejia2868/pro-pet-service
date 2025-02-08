@@ -1,5 +1,5 @@
 class Dog {
-    constructor(id, name, breed, age, size, energyLevel, status, good_with_children, good_with_pets, space_requirement, image) {
+    constructor(id, name, breed, age, size, energyLevel, status, preferences, image) {
         this.id = id;
         this.name = name;
         this.breed = breed;
@@ -7,10 +7,13 @@ class Dog {
         this.size = size;
         this.energyLevel = energyLevel;
         this.status = status;
-        this.good_with_children = good_with_children;
-        this.good_with_pets = good_with_pets;
-        this.space_requirement = space_requirement;
-        this.image = image; 
+        
+        // Agrupar los parámetros relacionados
+        this.good_with_children = preferences.good_with_children;
+        this.good_with_pets = preferences.good_with_pets;
+        this.space_requirement = preferences.space_requirement;
+
+        this.image = image;
     }
 
     toJSON() {
@@ -25,7 +28,7 @@ class Dog {
             good_with_children: this.good_with_children,
             good_with_pets: this.good_with_pets,
             space_requirement: this.space_requirement,
-            image: this.image 
+            image: this.image
         };
     }
 }

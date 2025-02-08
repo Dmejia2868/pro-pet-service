@@ -17,14 +17,18 @@ const getAllDogs = async () => {
 };
 
 // ✅ Registrar un nuevo perro
-const createDog = async ({ ownerId, name, breed, age, size, energyLevel, good_with_children, good_with_pets, space_requirement, imageUrl }) => {
+const createDog = async ({
+    ownerId, name, breed, age, size, energyLevel, status = 'active', 
+    preferences: { good_with_children, good_with_pets, space_requirement }, 
+    imageUrl
+}) => {
     return new Promise((resolve, reject) => {
         const sql = `INSERT INTO Dogs (ownerId, name, breed, age, size, energyLevel, status, adoption_status, good_with_children, good_with_pets, space_requirement, image) 
                      VALUES (?, ?, ?, ?, ?, ?, 'active', 'not_adopted', ?, ?, ?, ?)`;
 
         console.log("📥 Registrando perro con imagen:", imageUrl);
 
-        db.run(sql, [ownerId, name, breed, age, size, energyLevel, good_with_children, good_with_pets, space_requirement, imageUrl], function (err) {
+        db.run(sql, [ownerId, name, breed, age, size, energyLevel, status, good_with_children, good_with_pets, space_requirement, imageUrl], function (err) {
             if (err) {
                 console.error("❌ Error al registrar perro en la BD:", err);
                 reject(err);
@@ -37,7 +41,9 @@ const createDog = async ({ ownerId, name, breed, age, size, energyLevel, good_wi
 };
 
 // ✅ Buscar perros según preferencias con puntuación ponderada
-const searchDogsByPreferences = async ({ preferred_size, preferred_energy_level, has_children, has_other_pets, home_space }) => {
+const searchDogsByPreferences = async ({
+    preferred_size, preferred_energy_level, has_children, has_other_pets, home_space
+}) => {
     try {
         const sql = `
             SELECT *, 

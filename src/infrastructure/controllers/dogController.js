@@ -17,7 +17,6 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }  // Limitar el tamaño a 5 MB
 });
 
-
 // ✅ Obtener todos los perros
 router.get("/", async (req, res) => {
     try {
@@ -70,6 +69,13 @@ router.post("/", upload.single("image"), async (req, res) => {
         console.log("📸 Imagen recibida:", req.file ? req.file.filename : "No se subió imagen");
         console.log("🖼️ URL de la imagen guardada:", imageUrl);
 
+        // Agrupar preferencias en un objeto
+        const preferences = {
+            good_with_children,
+            good_with_pets,
+            space_requirement
+        };
+
         const newDog = await dogService.createDog({
             ownerId,
             name,
@@ -77,7 +83,7 @@ router.post("/", upload.single("image"), async (req, res) => {
             age,
             size,
             energyLevel,
-            good_with_children,
+            good_with_children,  // Asegúrate de pasarlos según sea necesario
             good_with_pets,
             space_requirement,
             imageUrl
