@@ -15,21 +15,21 @@ const getAllDogs = async () => {
 
         // 🔥 Asegurar que cada perro tenga una imagen válida
         const allDogs = dogs.map(dog => 
-            new Dog(
-                dog.id, 
-                dog.name, 
-                dog.breed, 
-                dog.age, 
-                dog.size, 
-                dog.energyLevel, 
-                dog.status, 
-                {
+            new Dog({
+                id: dog.id, 
+                name: dog.name, 
+                breed: dog.breed, 
+                age: dog.age, 
+                size: dog.size, 
+                energyLevel: dog.energyLevel, 
+                status: dog.status, 
+                preferences: {
                     good_with_children: dog.good_with_children, 
                     good_with_pets: dog.good_with_pets, 
                     space_requirement: dog.space_requirement
                 }, // Preferencias agrupadas
-                dog.image // ✅ Accede correctamente a la propiedad
-            ).toJSON()
+                image: dog.image // ✅ Accede correctamente a la propiedad
+            }).toJSON()
         );
         
         console.log("✅ Perros obtenidos:", allDogs);
@@ -39,7 +39,6 @@ const getAllDogs = async () => {
         throw new Error("Error al obtener los perros.");
     }
 };
-
 
 // ✅ Obtener un perro por ID
 const getDogById = async (id) => {
@@ -52,21 +51,21 @@ const getDogById = async (id) => {
             return null;
         }
 
-        return new Dog(
-            dog.id, 
-            dog.name, 
-            dog.breed, 
-            dog.age, 
-            dog.size, 
-            dog.energyLevel, 
-            dog.status, 
-            {
+        return new Dog({
+            id: dog.id, 
+            name: dog.name, 
+            breed: dog.breed, 
+            age: dog.age, 
+            size: dog.size, 
+            energyLevel: dog.energyLevel, 
+            status: dog.status, 
+            preferences: {
                 good_with_children: dog.good_with_children, 
                 good_with_pets: dog.good_with_pets, 
                 space_requirement: dog.space_requirement
             }, // Preferencias agrupadas
-            dog.image // <-- ✅ Se incluye `image`
-        ).toJSON();
+            image: dog.image // <-- ✅ Se incluye `image`
+        }).toJSON();
     } catch (error) {
         console.error(`❌ Error en getDogById(${id}):`, error);
         throw new Error("Error al obtener el perro.");
@@ -74,14 +73,14 @@ const getDogById = async (id) => {
 };
 
 // ✅ Registrar un nuevo perro en la base de datos
-const createDog = async ({ ownerId, name, breed, age, size, energyLevel, status = 'active', good_with_children, good_with_pets, space_requirement, imageUrl }) => {
+const createDog = async ({ ownerId, name, breed, age, size, energyLevel, status = 'active', preferences, imageUrl }) => {
     return new Promise((resolve, reject) => {
         const sql = `INSERT INTO Dogs (ownerId, name, breed, age, size, energyLevel, status, good_with_children, good_with_pets, space_requirement, image) 
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         console.log("📥 Registrando perro con imagen:", imageUrl);
 
-        db.run(sql, [ownerId, name, breed, age, size, energyLevel, status, good_with_children, good_with_pets, space_requirement, imageUrl], function (err) {
+        db.run(sql, [ownerId, name, breed, age, size, energyLevel, status, preferences.good_with_children, preferences.good_with_pets, preferences.space_requirement, imageUrl], function (err) {
             if (err) {
                 console.error("❌ Error al registrar perro en la BD:", err);
                 reject(err);

@@ -83,9 +83,8 @@ router.post("/", upload.single("image"), async (req, res) => {
             age,
             size,
             energyLevel,
-            good_with_children,  // Asegúrate de pasarlos según sea necesario
-            good_with_pets,
-            space_requirement,
+            status: "active", // Aseguramos que el estado sea "active"
+            preferences, // Pasamos el objeto preferences
             imageUrl
         });
 

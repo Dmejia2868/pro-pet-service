@@ -1,5 +1,7 @@
 class Dog {
-    constructor(id, name, breed, age, size, energyLevel, status, preferences, image) {
+    constructor({
+        id, name, breed, age, size, energyLevel, status, preferences, image
+    }) {
         this.id = id;
         this.name = name;
         this.breed = breed;
@@ -8,10 +10,10 @@ class Dog {
         this.energyLevel = energyLevel;
         this.status = status;
         
-        // Agrupar los parámetros relacionados
-        this.good_with_children = preferences.good_with_children;
-        this.good_with_pets = preferences.good_with_pets;
-        this.space_requirement = preferences.space_requirement;
+        // Desestructuración del objeto preferences
+        this.good_with_children = preferences?.good_with_children || false;
+        this.good_with_pets = preferences?.good_with_pets || false;
+        this.space_requirement = preferences?.space_requirement || 'unknown';
 
         this.image = image;
     }
