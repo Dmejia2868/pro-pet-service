@@ -1,35 +1,36 @@
-const adoptionRepository = require("../../infrastructure/repositories/adoptionRepository");
-const Adoption = require("../../domain/Adoption");
+const { runAsync, getAsync } = require("../../config/database");
 
-const getAllAdoptions = async () => {
-    return await adoptionRepository.getAllAdoptions();
+// ✅ **Obtener todos los perros**
+const getAllDogs = async () => {
+    return await getAsync("SELECT * FROM Dogs");
 };
 
-const createAdoption = async (userId, dogId) => {
-    const adoption = new Adoption(null, userId, dogId, "pending");
-    return await adoptionRepository.createAdoption(adoption);
+// ✅ **Obtener un perro por ID**
+const getDogById = async (id) => {
+    return await getAsync("SELECT * FROM Dogs WHERE id = ?", [id]);
 };
 
-const updateAdoptionStatus = async (id, status) => {
-    await adoptionRepository.updateAdoptionStatus(id, status);
-
-
-    // Obtener la adopción después de actualizarla
-    const updatedAdoption = await adoptionRepository.getAdoptionById(id);
-
-    return {
-        message: "Estado de adopción actualizado",
-        adoption: updatedAdoption
-    };
+// ✅ **Registrar un nuevo perro con todos los campos**
+const addDog = async (ownerId, name, breed, age, size, energyLevel, adoption_status, good_with_children, good_with_pets, space_requirement) => {
+    return await runAsync(
+        `INSERT INTO Dogs (ownerId, name, breed, age, size, energyLevel, adoption_status, good_with_children, good_with_pets, space_requirement) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [ownerId, name, breed, age, size, energyLevel, adoption_status, good_with_children, good_with_pets, space_requirement]
+    );
 };
 
-
-
-
-// 📌 Función para recomendar adopciones usando similitud coseno
-const recommendAdoptions = async (userPreferences) => {
-    const dogs = await adoptionRepository.getAllDogs(); // Obtener todos los perros
-    return Adoption.recommend(dogs, userPreferences);
+// ✅ **Actualizar datos de un perro**
+const updateDog = async (id, updatedData) => {
+    return await runAsync(
+        `UPDATE Dogs SET name = ?, breed = ?, age = ?, size = ?, energyLevel = ?, adoption_status = ?, good_with_children = ?, good_with_pets = ?, space_requirement = ?
+        WHERE id = ?`,
+        [updatedData.name, updatedData.breed, updatedData.age, updatedData.size, updatedData.energyLevel, updatedData.adoption_status, updatedData.good_with_children, updatedData.good_with_pets, updatedData.space_requirement, id]
+    );
 };
 
-module.exports = { getAllAdoptions, createAdoption, updateAdoptionStatus, recommendAdoptions };
+// ✅ **Eliminar un perro**
+const deleteDog = async (id) => {
+    return await runAsync("DELETE FROM Dogs WHERE id = ?", [id]);
+};
+
+module.exports = { getAllDogs, getDogById, addDog, updateDog, deleteDog };

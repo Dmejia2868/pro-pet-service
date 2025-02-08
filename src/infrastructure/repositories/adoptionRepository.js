@@ -6,11 +6,12 @@ const getAllAdoptions = async () => {
 
 const createAdoption = async (adoption) => {
     const result = await BaseRepository.run(
-        "INSERT INTO Adoptions (userId, dogId, status) VALUES (?, ?, ?)",
+        "INSERT INTO AdoptionRequests (adopterId, dogId, status) VALUES (?, ?, ?)",
         [adoption.userId, adoption.dogId, adoption.status]
     );
-    return BaseRepository.get("SELECT * FROM Adoptions WHERE id = ?", [result.lastID]);
+    return BaseRepository.get("SELECT * FROM AdoptionRequests WHERE id = ?", [result.lastID]);
 };
+
 
 const updateAdoptionStatus = async (id, status) => {
     return BaseRepository.run(

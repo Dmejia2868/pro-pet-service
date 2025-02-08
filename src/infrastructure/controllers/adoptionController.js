@@ -1,19 +1,26 @@
 const express = require("express");
 const adoptionService = require("../../application/services/adoptionService");
 const authenticateToken = require("../../middlewares/authMiddleware");
-
 const router = express.Router();
 
-// ✅ Proteger rutas con `authenticateToken`
-router.post("/", authenticateToken, async (req, res) => {
+const { runAsync } = require("../../config/database");
+
+// Save adopter data
+router.post("/", async (req, res) => {
+    const { name, email, preferred_size, preferred_energy_level, has_children, has_other_pets, home_space } = req.body;
+
     try {
-        const { userId, dogId } = req.body;
-        const adoption = await adoptionService.createAdoption(userId, dogId);
-        res.status(201).json({ message: "Solicitud de adopción creada", adoption });
+        const sql = `INSERT INTO Users (name, email, preferred_size, preferred_energy_level, has_children, has_other_pets, home_space) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+        const result = await runAsync(sql, [name, email, preferred_size, preferred_energy_level, has_children, has_other_pets, home_space]);
+        res.json({ message: "Adopter data saved successfully", adopterId: result.lastID });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: "Error saving adopter data" });
     }
 });
+
+
 
 // ✅ Obtener todas las adopciones
 router.get("/", authenticateToken, async (req, res) => {

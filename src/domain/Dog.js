@@ -1,48 +1,33 @@
-const bcrypt = require("bcrypt");
-
-const EmailValidationStatus = Object.freeze({
-    VALID: "VALID",
-    INVALID_FORMAT: "INVALID_FORMAT",
-    EMPTY: "EMPTY"
-});
-
-class User {
-    constructor(id, name, email, password) {
+class Dog {
+    constructor(id, name, breed, age, size, energyLevel, status, good_with_children, good_with_pets, space_requirement, image) {
         this.id = id;
         this.name = name;
-        this.email = email;
-        this.password = password;
+        this.breed = breed;
+        this.age = age;
+        this.size = size;
+        this.energyLevel = energyLevel;
+        this.status = status;
+        this.good_with_children = good_with_children;
+        this.good_with_pets = good_with_pets;
+        this.space_requirement = space_requirement;
+        this.image = image; 
     }
 
-    // Devuelve el usuario en formato JSON sin la contraseña
     toJSON() {
         return {
             id: this.id,
             name: this.name,
-            email: this.email
+            breed: this.breed,
+            age: this.age,
+            size: this.size,
+            energyLevel: this.energyLevel,
+            status: this.status,
+            good_with_children: this.good_with_children,
+            good_with_pets: this.good_with_pets,
+            space_requirement: this.space_requirement,
+            image: this.image 
         };
-    }
-
-    // Cifra la contraseña antes de almacenarla
-    async hashPassword() {
-        this.password = await bcrypt.hash(this.password, 10);
-    }
-
-    // Valida el formato del correo electrónico sin usar regex problemática
-    isValidEmail() {
-        if (!this.email || this.email.trim() === "") {
-            return EmailValidationStatus.EMPTY;
-        }
-
-        try {
-            const email = new URL(`mailto:${this.email}`);
-            return email.protocol === "mailto:"
-                ? EmailValidationStatus.VALID
-                : EmailValidationStatus.INVALID_FORMAT;
-        } catch {
-            return EmailValidationStatus.INVALID_FORMAT;
-        }
     }
 }
 
-module.exports = { User, EmailValidationStatus };
+module.exports = Dog;
