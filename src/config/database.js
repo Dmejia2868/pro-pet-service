@@ -118,37 +118,56 @@ const initDatabase = async () => {
 // ✅ Función para migrar la base de datos sin eliminar datos
 const migrateDatabase = async () => {
     return new Promise((resolve, reject) => {
-        db.serialize(() => {
+        db.serialize(async () => {
             console.log("📦 Migrando base de datos...");
 
-            // ✅ Verificar si las columnas 'phone' y 'address' ya existen antes de agregarlas
-            db.all(`PRAGMA table_info(Users);`, (err, columns) => {
-                if (err) {
-                    console.error("❌ Error obteniendo información de la tabla Users:", err);
-                    reject(err);
-                    return;
-                }
+            try {
+                const columns = await getTableColumns("Users");
+                await addColumnIfNotExists(columns, "phone", "TEXT");
+                await addColumnIfNotExists(columns, "address", "TEXT");
 
-                const columnNames = columns.map(col => col.name);
-                if (!columnNames.includes("phone")) {
-                    db.run(`ALTER TABLE Users ADD COLUMN phone TEXT;`, (err) => {
-                        if (err) console.error("❌ Error al agregar la columna 'phone':", err);
-                        else console.log("✅ Columna 'phone' agregada correctamente.");
-                    });
-                }
-                if (!columnNames.includes("address")) {
-                    db.run(`ALTER TABLE Users ADD COLUMN address TEXT;`, (err) => {
-                        if (err) console.error("❌ Error al agregar la columna 'address':", err);
-                        else console.log("✅ Columna 'address' agregada correctamente.");
-                    });
-                }
-            });
-
-            console.log("✅ Migración de la base de datos completada.");
-            resolve();
+                console.log("✅ Migración de la base de datos completada.");
+                resolve();
+            } catch (err) {
+                console.error("❌ Error durante la migración:", err);
+                reject(err);
+            }
         });
     });
 };
+
+const getTableColumns = (tableName) => {
+    return new Promise((resolve, reject) => {
+        db.all(`PRAGMA table_info(${tableName});`, (err, columns) => {
+            if (err) {
+                console.error(`❌ Error obteniendo información de la tabla ${tableName}:`, err);
+                reject(err);
+            } else {
+                resolve(columns);
+            }
+        });
+    });
+};
+
+const addColumnIfNotExists = (columns, columnName, columnType) => {
+    return new Promise((resolve, reject) => {
+        const columnNames = columns.map(col => col.name);
+        if (!columnNames.includes(columnName)) {
+            db.run(`ALTER TABLE Users ADD COLUMN ${columnName} ${columnType};`, (err) => {
+                if (err) {
+                    console.error(`❌ Error al agregar la columna '${columnName}':`, err);
+                    reject(err);
+                } else {
+                    console.log(`✅ Columna '${columnName}' agregada correctamente.`);
+                    resolve();
+                }
+            });
+        } else {
+            resolve(); // No hay necesidad de agregar la columna, ya existe
+        }
+    });
+};
+
 
 // ✅ Exportar funciones correctamente
 module.exports = { db, runAsync, getAsync, initDatabase, migrateDatabase };

@@ -34,9 +34,6 @@ const getAllDogs = async () => {
         return allDogs;
         
     
-
-        console.log("✅ Perros obtenidos:", activeDogs);
-        return activeDogs;
     } catch (error) {
         console.error("❌ Error en getAllDogs:", error);
         throw new Error("Error al obtener los perros.");

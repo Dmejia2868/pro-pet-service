@@ -7,18 +7,29 @@ const { runAsync } = require("../../config/database");
 
 // Save adopter data
 router.post("/", async (req, res) => {
-    const { name, email, preferred_size, preferred_energy_level, has_children, has_other_pets, home_space } = req.body;
+    const adopterData = req.body;
 
     try {
         const sql = `INSERT INTO Users (name, email, preferred_size, preferred_energy_level, has_children, has_other_pets, home_space) 
                      VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
-        const result = await runAsync(sql, [name, email, preferred_size, preferred_energy_level, has_children, has_other_pets, home_space]);
+        const result = await runAsync(sql, [
+            adopterData.name, 
+            adopterData.email, 
+            adopterData.preferred_size, 
+            adopterData.preferred_energy_level, 
+            adopterData.has_children, 
+            adopterData.has_other_pets, 
+            adopterData.home_space
+        ]);
+        
         res.json({ message: "Adopter data saved successfully", adopterId: result.lastID });
     } catch (error) {
+        console.error("Error saving adopter data:", error);
         res.status(500).json({ error: "Error saving adopter data" });
     }
 });
+
 
 
 

@@ -12,7 +12,11 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage });
+const upload = multer({ 
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }  // Limitar el tamaño a 5 MB
+});
+
 
 // ✅ Obtener todos los perros
 router.get("/", async (req, res) => {

@@ -12,6 +12,8 @@ const dogRoutes = require("./infrastructure/controllers/dogController");
 const adoptionRoutes = require("./infrastructure/controllers/adoptionController");
 
 const app = express();
+app.disable("x-powered-by");  // Desactiva el encabezado que muestra la versión de Express
+
 
 // 📂 Crear la carpeta "uploads" si no existe
 const uploadDir = path.join(__dirname, "uploads");

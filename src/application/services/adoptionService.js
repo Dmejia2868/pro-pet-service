@@ -11,13 +11,20 @@ const getDogById = async (id) => {
 };
 
 // ✅ **Registrar un nuevo perro con todos los campos**
-const addDog = async (ownerId, name, breed, age, size, energyLevel, adoption_status, good_with_children, good_with_pets, space_requirement) => {
+const addDog = async (dogData) => {
+    const {
+        ownerId, name, breed, age, size,
+        energyLevel, adoption_status, good_with_children,
+        good_with_pets, space_requirement
+    } = dogData;
+
     return await runAsync(
         `INSERT INTO Dogs (ownerId, name, breed, age, size, energyLevel, adoption_status, good_with_children, good_with_pets, space_requirement) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [ownerId, name, breed, age, size, energyLevel, adoption_status, good_with_children, good_with_pets, space_requirement]
     );
 };
+
 
 // ✅ **Actualizar datos de un perro**
 const updateDog = async (id, updatedData) => {
