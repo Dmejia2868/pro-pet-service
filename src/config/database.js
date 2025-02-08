@@ -60,6 +60,8 @@ const initDatabase = async () => {
                 name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
+                phone TEXT, -- ✅ Nueva columna para teléfono
+                address TEXT, -- ✅ Nueva columna para dirección
                 preferred_size INTEGER,
                 preferred_energy_level INTEGER,
                 has_children BOOLEAN,
@@ -67,7 +69,7 @@ const initDatabase = async () => {
                 home_space INTEGER
             )`, (err) => {
                 if (err) console.error("❌ Error al actualizar la tabla Users:", err);
-                else console.log("✅ Tabla Users actualizada.");
+                else console.log("✅ Tabla Users actualizada con las columnas 'phone' y 'address'.");
             });
 
             // ✅ Crear o modificar tabla Dogs sin alterar datos existentes
@@ -84,11 +86,11 @@ const initDatabase = async () => {
                 good_with_children INTEGER CHECK(good_with_children BETWEEN 1 AND 5),
                 good_with_pets INTEGER CHECK(good_with_pets BETWEEN 1 AND 5),
                 space_requirement INTEGER,
-                image TEXT, -- ✅ Columna para almacenar la imagen
+                image TEXT,
                 FOREIGN KEY(ownerId) REFERENCES Users(id) ON DELETE CASCADE
             )`, (err) => {
                 if (err) console.error("❌ Error al actualizar la tabla Dogs:", err);
-                else console.log("✅ Tabla Dogs actualizada con la columna 'image'.");
+                else console.log("✅ Tabla Dogs actualizada.");
             });
 
             // ✅ Crear o modificar tabla AdoptionRequests
@@ -119,24 +121,25 @@ const migrateDatabase = async () => {
         db.serialize(() => {
             console.log("📦 Migrando base de datos...");
 
-            // ✅ Verificar si la columna 'image' ya existe antes de agregarla
-            db.all(`PRAGMA table_info(Dogs);`, (err, columns) => {
+            // ✅ Verificar si las columnas 'phone' y 'address' ya existen antes de agregarlas
+            db.all(`PRAGMA table_info(Users);`, (err, columns) => {
                 if (err) {
-                    console.error("❌ Error obteniendo información de la tabla Dogs:", err);
+                    console.error("❌ Error obteniendo información de la tabla Users:", err);
                     reject(err);
                     return;
                 }
 
                 const columnNames = columns.map(col => col.name);
-                if (columnNames.includes("image")) {
-                    console.log("⚠️ La columna 'image' ya existe, omitiendo migración.");
-                } else {
-                    db.run(`ALTER TABLE Dogs ADD COLUMN image TEXT;`, (err) => {
-                        if (err) {
-                            console.error("❌ Error al agregar la columna 'image':", err);
-                        } else {
-                            console.log("✅ Columna 'image' agregada correctamente.");
-                        }
+                if (!columnNames.includes("phone")) {
+                    db.run(`ALTER TABLE Users ADD COLUMN phone TEXT;`, (err) => {
+                        if (err) console.error("❌ Error al agregar la columna 'phone':", err);
+                        else console.log("✅ Columna 'phone' agregada correctamente.");
+                    });
+                }
+                if (!columnNames.includes("address")) {
+                    db.run(`ALTER TABLE Users ADD COLUMN address TEXT;`, (err) => {
+                        if (err) console.error("❌ Error al agregar la columna 'address':", err);
+                        else console.log("✅ Columna 'address' agregada correctamente.");
                     });
                 }
             });
