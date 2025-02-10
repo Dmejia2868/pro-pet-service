@@ -1,62 +1,76 @@
-const BaseRepository = require("./baseRepository");
-const { getAsync, runAsync } = require("../../config/database");
-const bcrypt = require("bcrypt");
+const { db } = require("../../config/database");
 
+/** 📌 Obtener usuario por ID */
 const getUserById = async (id) => {
-    return await BaseRepository.get(
-        "SELECT id, name, email FROM Users WHERE id = ?",
-        [id]
-    );
+    return new Promise((resolve, reject) => {
+        db.get("SELECT id, name, email, province, city , phone FROM Users WHERE id = ?", [id], (err, row) => {
+            if (err) reject(err);
+            resolve(row);
+        });
+    });
 };
 
-
+/** 📌 Obtener usuario por email */
 const getUserByEmail = async (email) => {
-    console.log("Buscando usuario con email:", email);
-
-    const user = await getAsync(
-        "SELECT id, name, email, password FROM Users WHERE email = ?",
-        [email]
-    );
-
-    console.log("Usuario encontrado en la base de datos:", user);
-    return user;
+    return new Promise((resolve, reject) => {
+        db.get("SELECT * FROM Users WHERE email = ?", [email], (err, row) => {
+            if (err) reject(err);
+            resolve(row);
+        });
+    });
 };
+
+/** 📌 Crear usuario con provincia y ciudad */
 const createUser = async (user) => {
-    // 🔍 Verificar si el correo ya existe
     const existingUser = await getUserByEmail(user.email);
     if (existingUser) {
-        throw new Error("El correo electrónico ya está registrado.");
+        throw new Error("❌ El correo electrónico ya está registrado.");
     }
 
-    // ❌ NO vuelvas a encriptar la contraseña aquí
-    await runAsync(
-        "INSERT INTO Users (name, email, password) VALUES (?, ?, ?)",
-        [user.name, user.email, user.password] // Guardar directamente la contraseña ya hasheada
-    );
-
-    return getUserByEmail(user.email); // Devolver el usuario registrado
+    return new Promise((resolve, reject) => {
+        db.run(
+            "INSERT INTO Users (name, email, password, province, city,phone) VALUES (?, ?, ?, ?, ?, ?)",
+            [user.name, user.email, user.password, user.province, user.city, user.phone],
+            function (err) {
+                if (err) reject(err);
+                resolve({ id: this.lastID, ...user });
+            }
+        );
+    });
 };
 
-
-
+/** 📌 Obtener todos los usuarios */
 const getAllUsers = async () => {
-    return await BaseRepository.all("SELECT id, name, email FROM Users");
+    return new Promise((resolve, reject) => {
+        db.all("SELECT id, name, email, province, city , phone FROM Users", [], (err, rows) => {
+            if (err) reject(err);
+            resolve(rows);
+        });
+    });
 };
 
+/** 📌 Actualizar usuario */
 const updateUser = async (id, userData) => {
-    await BaseRepository.run(
-        "UPDATE Users SET name = ?, email = ? WHERE id = ?",
-        [userData.name, userData.email, id]
-    );
-    return getUserById(id);
+    return new Promise((resolve, reject) => {
+        db.run(
+            "UPDATE Users SET name = ?, email = ?, province = ?, city = ?, phone = ? WHERE id = ?",
+            [userData.name, userData.email, userData.province, userData.city, userData.phone, id],
+            function (err) {
+                if (err) reject(err);
+                resolve({ id, ...userData });
+            }
+        );
+    });
 };
 
+/** 📌 Eliminar usuario */
 const deleteUser = async (id) => {
-    return BaseRepository.run("DELETE FROM Users WHERE id = ?", [id]);
+    return new Promise((resolve, reject) => {
+        db.run("DELETE FROM Users WHERE id = ?", [id], function (err) {
+            if (err) reject(err);
+            resolve({ message: "✅ Usuario eliminado correctamente" });
+        });
+    });
 };
-
 
 module.exports = { createUser, getUserByEmail, getUserById, getAllUsers, updateUser, deleteUser };
-
-
-

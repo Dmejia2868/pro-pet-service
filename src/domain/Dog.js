@@ -1,8 +1,9 @@
 class Dog {
     constructor({
-        id, name, breed, age, size, energyLevel, status, preferences, image
+        id, ownerId, name, breed, age, size, energyLevel, status, preferences, image
     }) {
         this.id = id;
+        this.ownerId = ownerId; // ✅ Incluir ownerId
         this.name = name;
         this.breed = breed;
         this.age = age;
@@ -21,6 +22,7 @@ class Dog {
     toJSON() {
         return {
             id: this.id,
+            ownerId: this.ownerId,  // ✅ Incluir ownerId en la salida JSON
             name: this.name,
             breed: this.breed,
             age: this.age,

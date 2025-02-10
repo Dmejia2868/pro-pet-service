@@ -17,6 +17,7 @@ const getAllDogs = async () => {
         const allDogs = dogs.map(dog => 
             new Dog({
                 id: dog.id, 
+                ownerId: dog.ownerId,  
                 name: dog.name, 
                 breed: dog.breed, 
                 age: dog.age, 
@@ -32,6 +33,7 @@ const getAllDogs = async () => {
             }).toJSON()
         );
         
+        
         console.log("✅ Perros obtenidos:", allDogs);
         return allDogs;
     } catch (error) {
@@ -44,15 +46,18 @@ const getAllDogs = async () => {
 const getDogById = async (id) => {
     try {
         console.log(`🔍 Buscando perro con ID: ${id}`);
-        
+
         const dog = await dogRepository.getDogById(id);
         if (!dog) {
-            console.log("⚠️ Perro no encontrado.");
+            console.log("⚠️ Perro no encontrado en la base de datos.");
             return null;
         }
 
+        console.log("✅ Perro obtenido:", dog);
+
         return new Dog({
             id: dog.id, 
+            ownerId: dog.ownerId,  // 🔥 Asegurar que esto tiene un valor válido
             name: dog.name, 
             breed: dog.breed, 
             age: dog.age, 
@@ -63,14 +68,15 @@ const getDogById = async (id) => {
                 good_with_children: dog.good_with_children, 
                 good_with_pets: dog.good_with_pets, 
                 space_requirement: dog.space_requirement
-            }, // Preferencias agrupadas
-            image: dog.image // <-- ✅ Se incluye `image`
+            },
+            image: dog.image
         }).toJSON();
     } catch (error) {
         console.error(`❌ Error en getDogById(${id}):`, error);
         throw new Error("Error al obtener el perro.");
     }
 };
+
 
 // ✅ Registrar un nuevo perro en la base de datos
 const createDog = async ({ ownerId, name, breed, age, size, energyLevel, status = 'active', preferences, imageUrl }) => {
@@ -95,21 +101,20 @@ const createDog = async ({ ownerId, name, breed, age, size, energyLevel, status 
 // ✅ Actualizar datos de un perro
 const updateDog = async (id, dogData) => {
     try {
-        console.log(`✏️ Actualizando perro con ID: ${id}`, dogData);
+        console.log(`✏️ Recibiendo datos para actualizar perro con ID ${id}:`, dogData);
 
-        const updatedDog = await dogRepository.updateDog(id, dogData);
-        if (!updatedDog) {
-            console.log("⚠️ No se encontró el perro para actualizar.");
-            return null;
+        if (!dogData.breed || !dogData.name) {
+            throw new Error("Los campos 'breed' y 'name' son obligatorios.");
         }
 
-        console.log("✅ Perro actualizado:", updatedDog);
+        const updatedDog = await dogRepository.updateDog(id, dogData);
         return updatedDog;
     } catch (error) {
         console.error(`❌ Error en updateDog(${id}):`, error);
         throw new Error("Error al actualizar el perro.");
     }
 };
+
 
 const searchDogsByPreferences = async (preferences) => {
     return await dogRepository.searchDogsByPreferences(preferences);

@@ -1,19 +1,29 @@
 const jwt = require("jsonwebtoken");
-const SECRET_KEY = "supersecreto"; // Usa una clave segura
+const SECRET_KEY = process.env.JWT_SECRET || "supersecretkey";
 
 const authenticateToken = (req, res, next) => {
-    const token = req.header("Authorization");
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    console.log("🔑 Token recibido:", token);
+
     if (!token) {
-        return res.status(401).json({ error: "Acceso denegado, se requiere token" });
+        console.log("❌ No se recibió token en la solicitud");
+        return res.status(401).json({ error: "Acceso denegado. Token no proporcionado." });
     }
 
-    try {
-        const verified = jwt.verify(token.replace("Bearer ", ""), SECRET_KEY);
-        req.user = verified; // Se almacena la info del usuario en req.user
+    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+        if (err) {
+            console.log("❌ Error al verificar token:", err);
+            return res.status(403).json({ error: "Token inválido o expirado." });
+        }
+
+        console.log("✅ Token decodificado correctamente:", decoded);
+
+        req.userId = decoded.userId; // 🔥 Asegurar que esto se asigna
+        console.log("🆔 Usuario autenticado con ID:", req.userId);
         next();
-    } catch (error) {
-        res.status(403).json({ error: "Token inválido" });
-    }
+    });
 };
 
 module.exports = authenticateToken;

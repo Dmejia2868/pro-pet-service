@@ -5,16 +5,14 @@ const EmailValidationStatus = Object.freeze({
 });
 
 class User {
-    constructor(id, name, email, password) {
+    constructor(id, name, email, password, province, city, phone ) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
-    }
-
-    // Método para obtener el email del usuario
-    getEmail() {
-        return this.email;
+        this.province = province;
+        this.city = city;
+        this.phone = phone;
     }
 
     // Método para ocultar información sensible al convertir el objeto en JSON
@@ -23,10 +21,13 @@ class User {
             id: this.id,
             name: this.name,
             email: this.email,
+            province: this.province,
+            city: this.city,
+            phone: this.phone
         };
     }
 
-    // Método para validar si el email tiene un formato válido sin regex problemática
+    // Método para validar el email
     isValidEmail() {
         if (!this.email || this.email.trim() === "") {
             return EmailValidationStatus.EMPTY;

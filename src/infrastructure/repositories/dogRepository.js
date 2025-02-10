@@ -4,7 +4,7 @@ const { db } = require("../../config/database");
 // ✅ Obtener todos los perros
 const getAllDogs = async () => {
     try {
-        const sql = "SELECT * FROM Dogs WHERE status = 'active' AND adoption_status = 'not_adopted'";
+        const sql = "SELECT id, ownerId, name, breed, age, size, energyLevel, status, adoption_status, good_with_children, good_with_pets, space_requirement, image FROM Dogs WHERE status = 'active' AND adoption_status = 'not_adopted'";
         console.log("🔍 Ejecutando consulta:", sql);
         const dogs = await BaseRepository.all(sql);
 
@@ -71,7 +71,17 @@ const searchDogsByPreferences = async ({
 
 // ✅ Obtener un perro por ID
 const getDogById = async (id) => {
-    return await BaseRepository.get("SELECT * FROM Dogs WHERE id = ?", [id]);
+    try {
+        const sql = "SELECT * FROM Dogs WHERE id = ?";
+        console.log(`📡 Ejecutando consulta: ${sql} con ID = ${id}`);
+        const dog = await BaseRepository.get(sql, [id]);
+
+        console.log("🐶 Resultado de la BD:", dog);
+        return dog;
+    } catch (error) {
+        console.error("❌ Error en getDogById:", error);
+        throw error;
+    }
 };
 
 // ✅ Eliminar un perro
@@ -83,7 +93,7 @@ const deleteDog = async (id) => {
 const updateDog = async (id, dogData) => {
     await BaseRepository.run(
         "UPDATE Dogs SET name = ?, breed = ?, age = ? WHERE id = ?",
-        [dogData.name + " (editado)", dogData.breed, dogData.age, id]
+        [dogData.name, dogData.breed, dogData.age, id]
     );
     return getDogById(id);
 };

@@ -1,78 +1,51 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
-const fs = require("fs");
 
 const dbPath = process.env.DATABASE_URL || path.join(__dirname, "./src/config/database.sqlite");
 console.log("📂 La base de datos se guardará en:", dbPath);
 
-// Eliminar la base de datos solo si RESET_DB está activado en .env
-if (process.env.RESET_DB === "true" && fs.existsSync(dbPath)) {
-    fs.unlinkSync(dbPath);
-    console.log("🗑️ Base de datos eliminada correctamente porque RESET_DB está activado.");
-}
-
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
-        console.error("❌ Error al conectar la base de datos", err);
+        console.error("❌ Error al conectar la base de datos:", err.message);
     } else {
         console.log("✅ Base de datos conectada correctamente.");
     }
 });
 
-// ✅ Función para ejecutar consultas SELECT con async/await
-const getAsync = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.get(sql, params, (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
-        });
-    });
-};
-
-// ✅ Función para ejecutar consultas con Promesas (para usar con async/await)
-const runAsync = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.run(sql, params, function (err) {
-            if (err) reject(err);
-            else resolve({ lastID: this.lastID, changes: this.changes });
-        });
-    });
-};
-
-// ✅ Función para inicializar la base de datos y crear tablas
-const initDatabase = async () => {
+const initDatabase = () => {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
-            console.log("📦 Sincronizando base de datos...");
+            console.log("📦 Verificando estructura de la base de datos...");
 
             db.run("PRAGMA foreign_keys = ON;", (err) => {
                 if (err) {
-                    console.error("❌ Error al configurar claves foráneas:", err);
-                    reject(err);
-                } else {
-                    console.log("✅ Claves foráneas activadas.");
+                    console.error("❌ Error al configurar claves foráneas:", err.message);
+                    return reject(err);
                 }
+                console.log("✅ Claves foráneas activadas.");
             });
 
-            // ✅ Crear o modificar tabla Users
             db.run(`CREATE TABLE IF NOT EXISTS Users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
-                phone TEXT, -- ✅ Nueva columna para teléfono
-                address TEXT, -- ✅ Nueva columna para dirección
+                phone TEXT, 
+                province TEXT,
+                city TEXT,
                 preferred_size INTEGER,
                 preferred_energy_level INTEGER,
                 has_children BOOLEAN,
                 has_other_pets BOOLEAN,
                 home_space INTEGER
             )`, (err) => {
-                if (err) console.error("❌ Error al actualizar la tabla Users:", err);
-                else console.log("✅ Tabla Users actualizada con las columnas 'phone' y 'address'.");
+                if (err) {
+                    console.error("❌ Error al crear/verificar la tabla Users:", err.message);
+                    return reject(err);
+                }
+                console.log("✅ Tabla Users verificada o creada.");
             });
 
-            // ✅ Crear o modificar tabla Dogs sin alterar datos existentes
             db.run(`CREATE TABLE IF NOT EXISTS Dogs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ownerId INTEGER NOT NULL,
@@ -89,11 +62,13 @@ const initDatabase = async () => {
                 image TEXT,
                 FOREIGN KEY(ownerId) REFERENCES Users(id) ON DELETE CASCADE
             )`, (err) => {
-                if (err) console.error("❌ Error al actualizar la tabla Dogs:", err);
-                else console.log("✅ Tabla Dogs actualizada.");
+                if (err) {
+                    console.error("❌ Error al crear/verificar la tabla Dogs:", err.message);
+                    return reject(err);
+                }
+                console.log("✅ Tabla Dogs verificada o creada.");
             });
 
-            // ✅ Crear o modificar tabla AdoptionRequests
             db.run(`CREATE TABLE IF NOT EXISTS AdoptionRequests (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 adopterId INTEGER NOT NULL,
@@ -104,70 +79,14 @@ const initDatabase = async () => {
                 FOREIGN KEY(dogId) REFERENCES Dogs(id) ON DELETE CASCADE
             )`, (err) => {
                 if (err) {
-                    console.error("❌ Error al crear la tabla AdoptionRequests:", err);
-                    reject(err);
-                } else {
-                    console.log("✅ Tabla AdoptionRequests creada/verificada.");
-                    resolve();
+                    console.error("❌ Error al crear/verificar la tabla AdoptionRequests:", err.message);
+                    return reject(err);
                 }
-            });
-        });
-    });
-};
-
-// ✅ Función para migrar la base de datos sin eliminar datos
-const migrateDatabase = async () => {
-    return new Promise((resolve, reject) => {
-        db.serialize(async () => {
-            console.log("📦 Migrando base de datos...");
-
-            try {
-                const columns = await getTableColumns("Users");
-                await addColumnIfNotExists(columns, "phone", "TEXT");
-                await addColumnIfNotExists(columns, "address", "TEXT");
-
-                console.log("✅ Migración de la base de datos completada.");
+                console.log("✅ Tabla AdoptionRequests verificada o creada.");
                 resolve();
-            } catch (err) {
-                console.error("❌ Error durante la migración:", err);
-                reject(err);
-            }
-        });
-    });
-};
-
-const getTableColumns = (tableName) => {
-    return new Promise((resolve, reject) => {
-        db.all(`PRAGMA table_info(${tableName});`, (err, columns) => {
-            if (err) {
-                console.error(`❌ Error obteniendo información de la tabla ${tableName}:`, err);
-                reject(err);
-            } else {
-                resolve(columns);
-            }
-        });
-    });
-};
-
-const addColumnIfNotExists = (columns, columnName, columnType) => {
-    return new Promise((resolve, reject) => {
-        const columnNames = columns.map(col => col.name);
-        if (!columnNames.includes(columnName)) {
-            db.run(`ALTER TABLE Users ADD COLUMN ${columnName} ${columnType};`, (err) => {
-                if (err) {
-                    console.error(`❌ Error al agregar la columna '${columnName}':`, err);
-                    reject(err);
-                } else {
-                    console.log(`✅ Columna '${columnName}' agregada correctamente.`);
-                    resolve();
-                }
             });
-        } else {
-            resolve(); // No hay necesidad de agregar la columna, ya existe
-        }
+        });
     });
 };
 
-
-// ✅ Exportar funciones correctamente
-module.exports = { db, runAsync, getAsync, initDatabase, migrateDatabase };
+module.exports = { db, initDatabase };
